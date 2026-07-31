@@ -7,14 +7,15 @@
 //  Everything here runs on the main actor; only the raw stdout line assembly
 //  happens off-thread inside AdapterProcess.
 //
-//  Change-detection rules (mapping to the product spec):
-//   • Fire `onItemChanged(item, isNewItem: true)` only when `identity` changes
-//     and there is a valid title — so pause/resume and elapsed-time updates for
-//     the same track never re-trigger the popup.
-//   • Fire `onItemChanged(item, isNewItem: false)` for same-item updates (late
-//     artwork, playback-state changes) so a visible popup can refresh in place.
-//   • Suppress the very first snapshot after (re)starting, so whatever is
-//     already playing at launch doesn't announce itself.
+//  Presentation rules:
+//   • Fire `onItemChanged(item, shouldPresent: true)` when the media *item*
+//     changes (new `identity`) OR when the same item's play/pause state flips —
+//     both pausing and resuming announce the current track.
+//   • Fire `onItemChanged(item, shouldPresent: false)` for other same-item diffs
+//     (e.g. late artwork) so a visible popup can refresh in place without
+//     re-triggering.
+//   • Suppress presentations for the very first snapshot after (re)starting, so
+//     whatever is already playing/paused at launch doesn't announce itself.
 //
 
 import AppKit
@@ -31,9 +32,9 @@ final class NowPlayingMonitor {
 
     // MARK: Callbacks
 
-    /// `isNewItem` distinguishes a genuine track change from an in-place
-    /// refresh of the item already being shown.
-    var onItemChanged: ((NowPlayingItem, _ isNewItem: Bool) -> Void)?
+    /// `shouldPresent` is `true` when the popup should appear/restart (item
+    /// change or play/pause toggle) and `false` for a quiet in-place refresh.
+    var onItemChanged: ((NowPlayingItem, _ shouldPresent: Bool) -> Void)?
     var onHealthChange: ((MonitorHealth) -> Void)?
 
     private(set) var health: MonitorHealth = .starting {
@@ -59,6 +60,7 @@ final class NowPlayingMonitor {
 
     private var mergedState: [String: Any] = [:]
     private var lastIdentity: String?
+    private var lastPlaying: Bool?
 
     private var restartCount = 0
     private var lastStartTime = Date.distantPast
@@ -168,19 +170,29 @@ final class NowPlayingMonitor {
 
         let item = makeItem(title: title)
         let isNewItem = item.identity != lastIdentity
+        // A play/pause flip on the *same* item should also announce the track.
+        // (`lastPlaying == nil` guards the very first observation.)
+        let playbackToggled = !isNewItem
+            && lastPlaying != nil
+            && item.isPlaying != lastPlaying
 
-        if isNewItem {
-            lastIdentity = item.identity
-            // Swallow whatever was already playing when the stream (re)started.
-            guard Date() >= startupSuppressionDeadline else {
-                Log.monitor.debug("seed (suppressed) \(item.title, privacy: .public)")
-                return
-            }
-            Log.monitor.info("new item \(item.title, privacy: .public) — \(item.artist ?? "no artist", privacy: .public)")
-            onItemChanged?(item, true)
-        } else {
+        lastIdentity = item.identity
+        lastPlaying = item.isPlaying
+
+        guard isNewItem || playbackToggled else {
+            // Other same-item diffs (e.g. late artwork): quiet in-place refresh.
             onItemChanged?(item, false)
+            return
         }
+
+        // Swallow whatever is already playing/paused when the stream (re)started.
+        guard Date() >= startupSuppressionDeadline else {
+            Log.monitor.debug("seed (suppressed) \(item.title, privacy: .public)")
+            return
+        }
+
+        Log.monitor.info("present \(item.title, privacy: .public) — playing=\(item.isPlaying) new=\(isNewItem)")
+        onItemChanged?(item, true)
     }
 
     private func makeItem(title: String) -> NowPlayingItem {

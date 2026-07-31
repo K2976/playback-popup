@@ -37,8 +37,8 @@ final class PopupController {
     }
 
     /// Present or update the popup for a media item.
-    func present(_ item: NowPlayingItem, isNewItem: Bool) {
-        guard isNewItem else {
+    func present(_ item: NowPlayingItem, shouldPresent: Bool) {
+        guard shouldPresent else {
             // In-place refresh only matters while the popup is on screen.
             if isVisible { viewModel.update(with: item) }
             return

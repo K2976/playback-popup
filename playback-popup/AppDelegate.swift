@@ -28,8 +28,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate, ObservableObject {
             self?.control.togglePlayPause()
         }
 
-        monitor.onItemChanged = { [weak self] item, isNewItem in
-            self?.popup.present(item, isNewItem: isNewItem)
+        monitor.onItemChanged = { [weak self] item, shouldPresent in
+            self?.popup.present(item, shouldPresent: shouldPresent)
         }
         monitor.onHealthChange = { [weak self] health in
             self?.health = health

@@ -34,8 +34,9 @@ Nothing else — no scrubber, no timers, no next/previous, no volume, no AirPlay
 ## Features
 
 - **Automatic** — appears on media changes without opening any menu or window.
-- **Only on real changes** — pausing/resuming or metadata updates for the *same* track
-  never re-trigger the popup; it appears when the actual media item changes.
+- **Appears on the moments that matter** — when the media item changes and when you pause or
+  resume the current track. Quiet metadata updates (like artwork loading in) don't re-trigger
+  it.
 - **No flicker on rapid changes** — if a new track starts while the popup is still up, the
   content updates in place and the timer restarts, rather than closing and reopening.
 - **Native look & feel** — translucent vibrancy background, rounded (continuous-curve)
@@ -61,8 +62,8 @@ Nothing else — no scrubber, no timers, no next/previous, no volume, no AirPlay
 |-----------|--------------|
 | Next song / video starts | Popup fades in, shows for ~2.7 s, fades out |
 | New track while popup is visible | Content updates in place, timer restarts (no flicker) |
-| Pause / resume the same track | Nothing — no popup |
-| Playback stops | No popup; app stays idle |
+| Pause or resume the same track | Popup appears (on both pause and play) |
+| Playback stops entirely | No popup; app stays idle |
 | Artwork missing | Music-note placeholder |
 | Artist missing | Artist line hidden, layout stays balanced |
 
