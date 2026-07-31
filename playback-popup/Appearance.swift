@@ -16,7 +16,7 @@ enum Appearance {
 
     /// Overall popup dimensions. Kept fixed so positioning and animations are
     /// predictable and the layout never jumps as metadata changes.
-    static let popupWidth: CGFloat = 340
+    static let popupWidth: CGFloat = 280
     static let popupHeight: CGFloat = 104
     static let cornerRadius: CGFloat = 18
 
