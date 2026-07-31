@@ -1,0 +1,10 @@
+# macOS
+.DS_Store
+
+# Release pipeline output
+/build/
+/dist/
+
+# Xcode user state
+*.xcuserstate
+**/xcuserdata/
