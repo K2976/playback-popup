@@ -35,9 +35,10 @@ enum Appearance {
 
     // MARK: Positioning
 
-    /// Inset from the top-right corner of the active screen's visible frame.
-    /// Using the visible frame guarantees we never cover the menu bar or Dock.
-    static let screenMargin: CGFloat = 12
+    /// Vertical gap between the bottom of the menu bar / notch and the top of the
+    /// popup, so it reads as intentional rather than glued to the menu bar.
+    /// See `PopupPositioner` for how the popup is centered beneath the notch.
+    static let topGap: CGFloat = 10
 
     // MARK: Animation & timing
 

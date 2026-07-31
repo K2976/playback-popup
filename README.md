@@ -1,8 +1,8 @@
 # playback-popup
 
 A tiny, native-feeling macOS menu-bar utility with a single purpose: whenever the
-**currently playing media changes**, it briefly shows a clean "Now Playing" popup near the
-top-right of your screen, then quietly fades away.
+**currently playing media changes**, it briefly shows a clean "Now Playing" popup centered
+just beneath the notch (or the menu bar, on Macs without one), then quietly fades away.
 
 It's the feature that feels like Apple simply forgot to ship — no window, no clutter, no
 configuration. Just a glanceable heads-up every time a new song or video starts.
@@ -42,8 +42,8 @@ Nothing else — no scrubber, no timers, no next/previous, no volume, no AirPlay
 - **Native look & feel** — translucent vibrancy background, rounded (continuous-curve)
   corners, proper window shadow, native typography and spacing, smooth fade + slight
   downward slide on appearance, and full light/dark mode support.
-- **Positioned like system UI** — top-right, just below the menu bar, never covering the
-  Dock.
+- **Positioned like system UI** — horizontally centered beneath the notch (or the menu bar on
+  non-notch Macs), on the active display, never overlapping the menu bar, notch, or Dock.
 - **Menu-bar only** — runs as an accessory app (no Dock icon). The menu-bar icon is just an
   escape hatch; the popup does not depend on it.
 - **Works across apps** — anything that reports to macOS's Now Playing system: Apple Music,

@@ -113,20 +113,14 @@ final class PopupController {
 
     // MARK: - Positioning
 
-    /// Top-right of the active screen's visible frame (below the menu bar,
-    /// clear of the Dock). Prefers the screen under the pointer on multi-display
-    /// setups.
+    /// The popup's on-screen frame, centered beneath the notch / menu bar of the
+    /// active display. All placement math lives in `PopupPositioner`.
     private func targetFrame() -> NSRect {
-        let mouse = NSEvent.mouseLocation
-        let screen = NSScreen.screens.first { NSMouseInRect(mouse, $0.frame, false) }
-            ?? NSScreen.main
-            ?? NSScreen.screens.first
-
-        let visible = screen?.visibleFrame ?? NSRect(x: 0, y: 0, width: 1440, height: 900)
-        let width = Appearance.popupWidth
-        let height = Appearance.popupHeight
-        let x = visible.maxX - width - Appearance.screenMargin
-        let y = visible.maxY - height - Appearance.screenMargin
-        return NSRect(x: x, y: y, width: width, height: height)
+        let size = CGSize(width: Appearance.popupWidth, height: Appearance.popupHeight)
+        guard let screen = PopupPositioner.activeScreen else {
+            // No display reported (extremely unlikely) — keep it on-screen.
+            return NSRect(origin: .zero, size: size)
+        }
+        return PopupPositioner.frame(for: size, on: screen)
     }
 }
