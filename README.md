@@ -118,6 +118,58 @@ the `ADAPTER_ROOT` environment variable in the scheme.
 Project settings already applied: **App Sandbox off** (required to spawn `perl`) and
 **`LSUIElement` on** (menu-bar-only).
 
+## Building & releasing
+
+Beyond running from Xcode, the repo ships a small release pipeline that produces a standalone
+`.app` and a distributable `.dmg` in a `dist/` folder — no Xcode needed to launch the result.
+
+### Required tools
+
+- **Xcode** (full install, not just Command Line Tools). The scripts locate it automatically.
+- **[create-dmg](https://github.com/create-dmg/create-dmg)** — optional, for a polished DMG
+  window with a drag-to-Applications shortcut. Install it once:
+
+  ```sh
+  ./scripts/bootstrap.sh        # installs create-dmg via Homebrew
+  # or:  brew install create-dmg
+  ```
+
+  If it's not installed, the pipeline still works and falls back to plain `hdiutil`.
+
+### One command
+
+```sh
+./scripts/release.sh
+```
+
+This builds a Release app and packages it into a DMG. When it finishes you'll have:
+
+```
+dist/
+├── playback-popup.app     # standalone, ad-hoc-signed — double-click to launch
+└── playback-popup.dmg     # share this; open it and drag the app to Applications
+```
+
+### Individual steps
+
+```sh
+./scripts/build-app.sh      # Release build → dist/playback-popup.app
+./scripts/make-dmg.sh       # dist/playback-popup.app → dist/playback-popup.dmg
+```
+
+### Notes
+
+- Builds are **ad-hoc signed** (no Apple Developer account, no notarization). On *your* Mac
+  the app launches normally. On someone else's Mac, macOS Gatekeeper will block an unsigned
+  app on first launch — they can **right-click the app → Open** (once), or run
+  `xattr -dr com.apple.quarantine /Applications/playback-popup.app`.
+- **Portability:** this DMG is currently for local use. The app reads the `mediaremote-adapter`
+  from `~/Library/Application Support/mediaremote-adapter`, so on a Mac without that helper it
+  opens but shows "media monitoring unavailable". To make it fully portable later, bundle the
+  adapter into `Contents/Resources` (there's a marked extension point in
+  [`scripts/build-app.sh`](scripts/build-app.sh)) and add Developer ID signing + notarization —
+  the pipeline is organized so these slot in without restructuring.
+
 ## Customizing the look
 
 Every visual constant — popup size, corner radius, artwork size, spacing, margins, animation
