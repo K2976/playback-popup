@@ -7,13 +7,7 @@ just beneath the notch (or the menu bar, on Macs without one), then quietly fade
 It's the feature that feels like Apple simply forgot to ship — no window, no clutter, no
 configuration. Just a glanceable heads-up every time a new song or video starts.
 
-<!-- Add a screenshot of the popup here, e.g.:
-![playback-popup](docs/popup.png)
--->
-
-> _Screenshot coming soon._
-
----
+<img width="272" height="100" alt="Screenshot 2026-08-01 at 1 17 53 AM" src="https://github.com/user-attachments/assets/7c6c8505-b030-4867-a250-9882f5beb65d" />
 
 ## What it does
 
