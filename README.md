@@ -154,16 +154,10 @@ Beyond running from Xcode, the repo ships a small release pipeline that produces
 
 ### Required tools
 
-- **Xcode** (full install, not just Command Line Tools). The scripts locate it automatically.
+- **Xcode** (full install, not just Command Line Tools). The script locates it automatically.
 - **[create-dmg](https://github.com/create-dmg/create-dmg)** — optional, for a polished DMG
-  window with a drag-to-Applications shortcut. Install it once:
-
-  ```sh
-  ./scripts/bootstrap.sh        # installs create-dmg via Homebrew
-  # or:  brew install create-dmg
-  ```
-
-  If it's not installed, the pipeline still works and falls back to plain `hdiutil`.
+  window with a drag-to-Applications shortcut: `brew install create-dmg`. If it's not
+  installed, the script still works and falls back to plain `hdiutil`.
 
 ### One command
 
@@ -196,13 +190,6 @@ xattr -dr com.apple.quarantine "/Applications/playback-popup.app"
 normally. Alternatively, without Terminal: **right-click the app → Open → Open** the first
 time. The only permanent fix is Developer ID signing + notarization (see the roadmap below).
 
-### Individual steps
-
-```sh
-./scripts/build-app.sh      # Release build → dist/playback-popup.app
-./scripts/make-dmg.sh       # dist/playback-popup.app → dist/playback-popup.dmg
-```
-
 ### Notes
 
 - Builds are **ad-hoc signed** (no Apple Developer account, no notarization). On *your* Mac
@@ -212,9 +199,7 @@ time. The only permanent fix is Developer ID signing + notarization (see the roa
 - **Portability:** this DMG is currently for local use. The app reads the `mediaremote-adapter`
   from `~/Library/Application Support/mediaremote-adapter`, so on a Mac without that helper it
   opens but shows "media monitoring unavailable". To make it fully portable later, bundle the
-  adapter into `Contents/Resources` (there's a marked extension point in
-  [`scripts/build-app.sh`](scripts/build-app.sh)) and add Developer ID signing + notarization —
-  the pipeline is organized so these slot in without restructuring.
+  adapter into `Contents/Resources` and add Developer ID signing + notarization.
 
 ## Customizing the look
 
