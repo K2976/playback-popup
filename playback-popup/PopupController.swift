@@ -22,9 +22,17 @@ final class PopupController {
     private lazy var panel = PopupPanel(viewModel: viewModel)
 
     private var isVisible = false
+    private var isHovered = false
     private var dismissTask: Task<Void, Never>?
     /// Invalidates in-flight fade-out completions when the popup is revived.
     private var dismissToken = 0
+
+    init() {
+        // While the pointer is over the popup, keep it up; dismiss once it leaves.
+        viewModel.onHoverChanged = { [weak self] hovering in
+            self?.handleHover(hovering)
+        }
+    }
 
     /// Wire up the Play/Pause action. The tap flips the button optimistically
     /// for instant feedback; the real state is confirmed by the next stream
@@ -48,8 +56,11 @@ final class PopupController {
 
         if isVisible {
             // Cancel any pending fade-out, snap back to full opacity, restart.
+            // Re-target the frame so a track change follows you to whatever
+            // screen you're now on (the popup already joins all Spaces).
             Log.popup.info("update in place: \(item.title, privacy: .public)")
             dismissToken += 1
+            panel.setFrame(targetFrame(), display: true)
             NSAnimationContext.runAnimationGroup { context in
                 context.duration = 0.15
                 panel.animator().alphaValue = 1
@@ -73,6 +84,10 @@ final class PopupController {
         panel.alphaValue = 0
         panel.orderFrontRegardless()
         isVisible = true
+        // Fresh presentation: clear any hover state left stale by the previous
+        // popup dismissing out from under the cursor (`onHover(false)` may not
+        // fire then). `.onHover` re-asserts true if the pointer is over the new one.
+        isHovered = false
 
         NSAnimationContext.runAnimationGroup { context in
             context.duration = Appearance.fadeInDuration
@@ -85,10 +100,30 @@ final class PopupController {
 
     private func scheduleDismiss() {
         dismissTask?.cancel()
+        // Stay up as long as the pointer is over the popup; the timer (re)starts
+        // when the pointer leaves (see `handleHover`).
+        guard !isHovered else { return }
         dismissTask = Task { @MainActor [weak self] in
             try? await Task.sleep(for: .seconds(Appearance.displayDuration))
             guard let self, !Task.isCancelled else { return }
             self.dismissAnimated()
+        }
+    }
+
+    /// Keep the popup up while hovered; restart a fresh full-duration timer once
+    /// the pointer leaves. Also rescues a popup that's mid-fade-out.
+    private func handleHover(_ hovering: Bool) {
+        isHovered = hovering
+        guard isVisible else { return }
+        if hovering {
+            dismissTask?.cancel()
+            dismissToken += 1   // invalidate any in-flight fade-out completion
+            NSAnimationContext.runAnimationGroup { context in
+                context.duration = 0.15
+                panel.animator().alphaValue = 1
+            }
+        } else {
+            scheduleDismiss()
         }
     }
 

@@ -82,6 +82,41 @@ it can launch the Perl bridge. It's intended for personal/local use.
 - Xcode.
 - The `mediaremote-adapter` helper (see setup below).
 
+## Install & run (from the DMG)
+
+The quickest way to run the app without Xcode — this is what you share with friends.
+
+**1. Get the `.dmg`.** Either:
+- Download the `playback-popup.dmg` someone shared with you, **or**
+- Build it yourself: clone this repo and run `./scripts/release.sh` — it produces
+  `dist/playback-popup.dmg` (see [Building & releasing](#building--releasing)).
+
+**2. Install it.** Double-click the `.dmg`, then drag **playback-popup** onto the
+**Applications** shortcut in the window that opens. Eject the DMG when done.
+
+**3. First launch — clear the Gatekeeper block.** The app is ad-hoc signed (not notarized by
+Apple), so on a Mac it wasn't built on, the first launch is blocked with *"playback-popup is
+damaged / can't be opened."* The app is fine — this is just macOS quarantine. Clear it once,
+in Terminal:
+
+```sh
+xattr -dr com.apple.quarantine "/Applications/playback-popup.app"
+```
+
+Then open the app normally. *(Alternative, no Terminal: right-click the app → **Open** →
+**Open**, once.)*
+
+**4. Install the adapter — required.** The app reads Now Playing info through the
+`mediaremote-adapter` helper, which is **not** bundled in the DMG yet. Without it the app
+still launches but shows *"Media monitoring unavailable"* and no popups appear. Install it
+into `~/Library/Application Support/mediaremote-adapter/` as described in
+[Build & run](#build--run) below (the "To build the adapter from source" steps). This is a
+one-time setup on each Mac.
+
+Once the adapter is in place, play or skip a track in Apple Music (or a video in
+Safari/Chrome) and the popup appears. The app runs menu-bar-only (no Dock icon); quit it from
+its menu-bar icon.
+
 ## Build & run
 
 The adapter (a Perl script + a helper framework) is read from a development location
@@ -143,6 +178,23 @@ dist/
 ├── playback-popup.app     # standalone, ad-hoc-signed — double-click to launch
 └── playback-popup.dmg     # share this; open it and drag the app to Applications
 ```
+
+### Sharing the DMG — "playback-popup is damaged / can't be opened"
+
+The DMG is **ad-hoc signed** (no paid Apple Developer account, so no notarization). When a
+friend downloads it, macOS quarantines it and Gatekeeper blocks it on first launch with a
+*"cannot be opened"* / *"is damaged"* message. The app is fine — this is just Gatekeeper.
+
+Tell them to drag the app to **/Applications**, then run this once in Terminal to clear the
+quarantine flag:
+
+```sh
+xattr -dr com.apple.quarantine "/Applications/playback-popup.app"
+```
+
+(Adjust the path if they put it somewhere other than `/Applications`.) After that it opens
+normally. Alternatively, without Terminal: **right-click the app → Open → Open** the first
+time. The only permanent fix is Developer ID signing + notarization (see the roadmap below).
 
 ### Individual steps
 

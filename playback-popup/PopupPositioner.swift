@@ -18,16 +18,17 @@ import AppKit
 
 enum PopupPositioner {
 
-    /// The display the user is currently working on.
+    /// The display the user is currently looking at.
     ///
-    /// Prefers the screen that owns the key window (Apple's definition of the
-    /// "main" screen — i.e. where the active session is focused), then the screen
-    /// under the pointer, then the first screen. Deliberately never assumes the
-    /// built-in display.
+    /// Prefers the screen under the pointer — for a menu-bar accessory app with no
+    /// key window of its own, the cursor is the most reliable signal of which
+    /// monitor the user is actually using. Falls back to AppKit's "main" screen,
+    /// then the first screen. Deliberately never assumes the built-in display, so
+    /// the popup lands on the external monitor when that's where you're working.
     static var activeScreen: NSScreen? {
-        if let focused = NSScreen.main { return focused }
         let mouse = NSEvent.mouseLocation
         return NSScreen.screens.first { NSMouseInRect(mouse, $0.frame, false) }
+            ?? NSScreen.main
             ?? NSScreen.screens.first
     }
 
